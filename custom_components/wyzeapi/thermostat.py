@@ -1,15 +1,16 @@
 """Platform for thermostat integration."""
 import asyncio
 import logging
-# Import the device class from the component that you want to support
-from typing import Any, Optional, List
+from typing import Optional, List
+from enum import Enum
 
 from homeassistant.components.climate import ClimateEntity
 from homeassistant.const import ATTR_ATTRIBUTION
 
 from . import DOMAIN
 from wyzeapy.client import WyzeApiClient
-from wyzeapy.devices import Switch
+# TODO add thermostat to devices
+# from wyzeapy.devices import Switch
 
 _LOGGER = logging.getLogger(__name__)
 ATTRIBUTION = "Data provided by Wyze"
@@ -25,12 +26,31 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     wyzeapi_client: WyzeApiClient = hass.data[DOMAIN]["wyzeapi_account"]
 
     # Add devices
-    switches = await wyzeapi_client.list_switches()
-    async_add_entities([HAWyzeSwitch(wyzeapi_client, switch) for switch in switches], True)
+    # TODO change to thermostat
+    # switches = await wyzeapi_client.list_switches()
+    # async_add_entities([HAWyzeSwitch(wyzeapi_client, switch) for switch in switches], True)
 
 
 class HAWyzeSwitch(ClimateEntity):
     """Representation of a Wyze Switch."""
+
+    __client: WyzeApiClient
+
+    class State(Enum):
+        HOME = 1
+        AWAY = 2
+        SLEEP = 3
+
+    class Mode(Enum):
+        OFF = 0
+        HEAT = 1
+        COOL = 2
+        AUTO = 3
+
+
+    def __init__(self, client: WyzeApiClient, thermostat):
+        self.__client = client
+        self.__thermostat = thermostat  # TODO add thermostat to the wyzeapy package
 
     @property
     def hvac_mode(self) -> str:
