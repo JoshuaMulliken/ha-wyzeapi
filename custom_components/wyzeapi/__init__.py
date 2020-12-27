@@ -17,6 +17,7 @@ CONF_SENSORS = "sensors"
 CONF_LIGHT = "light"
 CONF_SWITCH = "switch"
 CONF_LOCK = "lock"
+CONF_THERM = "thermostat"
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
@@ -25,7 +26,8 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Optional(CONF_SENSORS, default=True): cv.boolean,
         vol.Optional(CONF_LIGHT, default=True): cv.boolean,
         vol.Optional(CONF_SWITCH, default=True): cv.boolean,
-        vol.Optional(CONF_LOCK, default=True): cv.boolean
+        vol.Optional(CONF_LOCK, default=True): cv.boolean,
+        vol.Optional(CONF_THERM, default=False): cv.boolean
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -50,6 +52,7 @@ https://github.com/JoshuaMulliken/ha-wyzeapi/issues
     light_support = config[DOMAIN].get(CONF_LIGHT)
     switch_support = config[DOMAIN].get(CONF_SWITCH)
     lock_support = config[DOMAIN].get(CONF_LOCK)
+    thermostat_support = config[DOMAIN].get(CONF_THERM)
 
     if not await wyzeapi_account.is_logged_in():
         _LOGGER.error("Not connected to Wyze account. Unable to add devices. Check your configuration.")
@@ -75,7 +78,10 @@ https://github.com/JoshuaMulliken/ha-wyzeapi/issues
         _LOGGER.debug("Starting WyzeApi Sensors")
     if lock_support:
         await discovery.async_load_platform(hass, "lock", DOMAIN, {}, config)
-        _LOGGER.debug("Starting WyzeApi lock")
+        _LOGGER.debug("Starting WyzeApi Lock. This is not well supported and you may encounter issues")
+    if thermostat_support:
+        await discovery.async_load_platform(hass, "thermostat", DOMAIN, {}, config)
+        _LOGGER.debug("Starting WyzeApi Thermostat")
     else:
         _LOGGER.error("WyzeApi authenticated but could not find any devices.")
 
